@@ -9,7 +9,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class BoilerMenu extends FutureGeneratorsMenu {
    public int timeRemaining;
@@ -23,7 +23,7 @@ public class BoilerMenu extends FutureGeneratorsMenu {
       this.SLOT_COUNT = 1;
       this.SLOT_INPUT = 1;
       if (be instanceof TileBoiler boiler) {
-         this.addSlot(new SlotItemHandler(boiler.items, 0, 80, 53));
+         this.addSlot(new ResourceHandlerSlot(boiler.items, boiler.items::set, 0, 80, 53));
          this.layoutPlayerInventorySlots(player.getInventory(), 8, 84);
          this.addDataSlot(new DataSlot() {
             public int get() {
@@ -45,7 +45,7 @@ public class BoilerMenu extends FutureGeneratorsMenu {
          });
          this.addDataSlot(new DataSlot() {
             public int get() {
-               return boiler.tank.getFluidInTank(0).getAmount() & 65535;
+               return boiler.tank.inTank.getFluidAmount() & 65535;
             }
 
             public void set(int pValue) {
@@ -54,7 +54,7 @@ public class BoilerMenu extends FutureGeneratorsMenu {
          });
          this.addDataSlot(new DataSlot() {
             public int get() {
-               return boiler.tank.getFluidInTank(0).getAmount() >> 16 & 65535;
+               return boiler.tank.inTank.getFluidAmount() >> 16 & 65535;
             }
 
             public void set(int pValue) {
@@ -63,7 +63,7 @@ public class BoilerMenu extends FutureGeneratorsMenu {
          });
          this.addDataSlot(new DataSlot() {
             public int get() {
-               return boiler.tank.getFluidInTank(1).getAmount() & 65535;
+               return boiler.tank.outTank.getFluidAmount() & 65535;
             }
 
             public void set(int pValue) {
@@ -72,7 +72,7 @@ public class BoilerMenu extends FutureGeneratorsMenu {
          });
          this.addDataSlot(new DataSlot() {
             public int get() {
-               return boiler.tank.getFluidInTank(1).getAmount() >> 16 & 65535;
+               return boiler.tank.outTank.getFluidAmount() >> 16 & 65535;
             }
 
             public void set(int pValue) {

@@ -1,41 +1,57 @@
 package co.uk.mommyheather.futuregenerators.util;
 
-import net.minecraftforge.energy.EnergyStorage;
+import net.neoforged.neoforge.transfer.energy.SimpleEnergyHandler;
 
-public abstract class FutureGeneratorsEnergyStorage extends EnergyStorage {
-   public FutureGeneratorsEnergyStorage(int capacity) {
-      super(capacity, Integer.MAX_VALUE);
-   }
+/**
+ * An FE buffer: NeoForge's {@link SimpleEnergyHandler} (what cables and other mods see), plus the direct helpers the
+ * machines use on their own energy, which ignore the external insert and extract limits.
+ */
+public class FutureGeneratorsEnergyStorage extends SimpleEnergyHandler {
+    private final Runnable onChanged;
 
-   public FutureGeneratorsEnergyStorage(int capacity, int maxTransfer) {
-      super(capacity, maxTransfer);
-   }
+    public FutureGeneratorsEnergyStorage(int capacity, Runnable onChanged) {
+        this(capacity, Integer.MAX_VALUE, Integer.MAX_VALUE, onChanged);
+    }
 
-   public FutureGeneratorsEnergyStorage(int capacity, int maxReceive, int maxExtract) {
-      super(capacity, maxReceive, maxExtract);
-   }
+    public FutureGeneratorsEnergyStorage(int capacity, int maxReceive, int maxExtract, Runnable onChanged) {
+        super(capacity, maxReceive, maxExtract);
+        this.onChanged = onChanged;
+    }
 
-   public FutureGeneratorsEnergyStorage(int capacity, int maxReceive, int maxExtract, int energy) {
-      super(capacity, maxReceive, maxExtract, energy);
-   }
+    @Override
+    protected void onEnergyChanged(int previousAmount) {
+        onChanged.run();
+    }
 
-   public int receiveEnergy(int maxReceive, boolean simulate) {
-      this.onContentsChanged();
-      return super.receiveEnergy(maxReceive, simulate);
-   }
+    public int getEnergyStored() {
+        return energy;
+    }
 
-   public int extractEnergy(int maxExtract, boolean simulate) {
-      this.onContentsChanged();
-      return super.extractEnergy(maxExtract, simulate);
-   }
+    public int getMaxEnergyStored() {
+        return capacity;
+    }
 
-   public void setCapacity(int capacity) {
-      this.capacity = capacity;
-   }
+    /** Applies a changed capacity, discarding energy above a smaller one. */
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+        if (energy > capacity) set(capacity);
+    }
 
-   public void setEnergy(int i) {
-      this.energy = i;
-   }
+    public void setEnergy(int energy) {
+        set(Math.max(0, Math.min(energy, capacity)));
+    }
 
-   public abstract void onContentsChanged();
+    /** Adds up to {@code amount} FE right away (machine-internal). Returns the amount added. */
+    public int receiveEnergy(int amount) {
+        int added = Math.max(0, Math.min(amount, capacity - energy));
+        if (added > 0) set(energy + added);
+        return added;
+    }
+
+    /** Removes up to {@code amount} FE right away (machine-internal). Returns the amount removed. */
+    public int extractEnergy(int amount) {
+        int removed = Math.max(0, Math.min(amount, energy));
+        if (removed > 0) set(energy - removed);
+        return removed;
+    }
 }

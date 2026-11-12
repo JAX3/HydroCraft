@@ -2,24 +2,16 @@ package co.uk.mommyheather.futuregenerators.render;
 
 import co.uk.mommyheather.futuregenerators.config.FutureGeneratorsConfig;
 import co.uk.mommyheather.futuregenerators.tile.TilePump;
-import com.mojang.blaze3d.vertex.PoseStack;
-import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
-import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider.Context;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
-@OnlyIn(Dist.CLIENT)
-public class PumpRenderer implements BlockEntityRenderer<TilePump> {
-   public PumpRenderer(Context context) {
+public class PumpRenderer extends FluidBlockRenderer<TilePump> {
+   @Override
+   protected FluidStack fluid(TilePump be) {
+      return be.tank.getFluid();
    }
 
-   public void render(TilePump tile, float partialTicks, PoseStack stack, MultiBufferSource bufferSource, int packedLightIn, int packedOverlayIn) {
-      FluidStack fluid = tile.tank.getFluid();
-      if (!fluid.isEmpty() && fluid.getAmount() > 0) {
-         float ylevel = (float)fluid.getAmount() / ((Integer)FutureGeneratorsConfig.SERVER.fluidPumpCapacity.get()).intValue();
-         RenderHelper.renderFluidInWorld(tile.getBlockPos(), partialTicks, stack, bufferSource, packedLightIn, packedOverlayIn, fluid.getFluid(), ylevel);
-      }
+   @Override
+   protected int capacity(TilePump be) {
+      return FutureGeneratorsConfig.SERVER.fluidPumpCapacity.get();
    }
 }

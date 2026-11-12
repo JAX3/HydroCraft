@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "I": "minecraft:iron_ingot",
+    "G": "minecraft:glass"
+  },
+  "pattern": [
+    "AIA",
+    "G G",
+    "AIA"
+  ],
+  "result": {
+    "id": "futuregenerators:tank"
+  }
+}

@@ -1,100 +1,55 @@
 package co.uk.mommyheather.futuregenerators.tile;
 
 import co.uk.mommyheather.futuregenerators.config.FutureGeneratorsConfig;
-import java.util.function.Predicate;
+import co.uk.mommyheather.futuregenerators.util.FluidTank;
+import co.uk.mommyheather.futuregenerators.util.ItemStorage;
+import co.uk.mommyheather.futuregenerators.util.TransferUtils;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
-import net.minecraftforge.fluids.capability.templates.FluidTank;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemStackHandler;
-import org.jetbrains.annotations.NotNull;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.fluid.FluidResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class TileBoiler extends BlockEntity {
    public TileBoiler.DoubleTank tank;
-   public ItemStackHandler items;
+   public ItemStorage items;
    private boolean ticked = false;
-   private LazyOptional<IFluidHandler> lazyTank;
-   private LazyOptional<IItemHandler> lazyItems;
    private int ticks = 0;
    public int fuelRemaining = 0;
 
-   public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-      if (cap == ForgeCapabilities.ITEM_HANDLER) {
-         return this.lazyItems.cast();
-      } else {
-         return cap == ForgeCapabilities.FLUID_HANDLER ? this.lazyTank.cast() : super.getCapability(cap, side);
-      }
-   }
-
-   public void invalidateCaps() {
-      super.invalidateCaps();
-      this.lazyTank.invalidate();
-      this.lazyItems.invalidate();
-   }
-
-   public TileBoiler(BlockPos p_155229_, BlockState p_155230_) {
-      super((BlockEntityType)Tiles.boiler.get(), p_155229_, p_155230_);
-      this.tank = new TileBoiler.DoubleTank(0, stack -> stack.getFluid().isSame(Fluids.WATER)) {
-         @Override
-         protected void onContentsChanged() {
-            TileBoiler.this.setChanged();
-         }
-      };
-      this.items = new ItemStackHandler(1) {
-         public boolean isItemValid(int slot, @NotNull ItemStack stack) {
-            return ForgeHooks.getBurnTime(stack, RecipeType.SMELTING) > 0;
-         }
-
-         public void onContentsChanged(int slot) {
-            TileBoiler.this.setChanged();
-         }
-      };
-      this.lazyTank = LazyOptional.of(() -> this.tank);
-      this.lazyItems = LazyOptional.of(() -> this.items);
+   public TileBoiler(BlockPos pos, BlockState state) {
+      super(Tiles.boiler.get(), pos, state);
+      this.tank = new TileBoiler.DoubleTank(0, this::setChanged);
+      this.items = new ItemStorage(1, (slot, stack) -> TransferUtils.isFuel(stack), this::setChanged);
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, BlockEntity be) {
-      if (!level.isClientSide) {
+      if (!level.isClientSide()) {
          TileBoiler boiler = (TileBoiler)be;
          if (!boiler.ticked) {
-            boiler.tank.setCapacity((Integer)FutureGeneratorsConfig.SERVER.boilerWaterCapacity.get(), 2);
+            boiler.tank.setCapacity(FutureGeneratorsConfig.SERVER.boilerWaterCapacity.get(), 2);
             boiler.ticked = true;
          }
 
          boiler.ticks++;
          if (boiler.fuelRemaining <= 0) {
             if (boiler.tank.inTank.getFluidAmount() > 0 && boiler.tank.outTank.getFluidAmount() < boiler.tank.outTank.getCapacity()) {
-               ItemStack stack = boiler.items.extractItem(0, 1, false);
-               boiler.fuelRemaining = ForgeHooks.getBurnTime(stack, RecipeType.SMELTING);
+               ItemStack stack = boiler.items.extractItem(0, 1);
+               boiler.fuelRemaining = TransferUtils.burnTime(level, boiler, stack);
             }
          } else {
             boiler.fuelRemaining--;
-            if (boiler.tank.inTank.getFluidAmount() >= (Integer)FutureGeneratorsConfig.SERVER.boilerHeatingRate.get()) {
-               boiler.tank.drainIntake((Integer)FutureGeneratorsConfig.SERVER.boilerHeatingRate.get());
-               boiler.tank
-                  .fillOutput(
-                     new FluidStack(
-                        (Fluid)co.uk.mommyheather.futuregenerators.fluids.Fluids.HOT_WATER.get(),
-                        (Integer)FutureGeneratorsConfig.SERVER.boilerHeatingRate.get()
-                     )
-                  );
+            int rate = FutureGeneratorsConfig.SERVER.boilerHeatingRate.get();
+            if (boiler.tank.inTank.getFluidAmount() >= rate) {
+               boiler.tank.inTank.drain(rate);
+               boiler.tank.outTank.fill(FluidResource.of(co.uk.mommyheather.futuregenerators.fluids.Fluids.HOT_WATER.get()), rate);
             }
          }
 
@@ -104,128 +59,100 @@ public class TileBoiler extends BlockEntity {
       }
    }
 
-   protected void saveAdditional(CompoundTag tag) {
-      super.saveAdditional(tag);
-      tag.put("tank", this.tank.writeToNBT(new CompoundTag()));
-      tag.put("items", this.items.serializeNBT());
-      tag.putInt("burnTime", this.fuelRemaining);
+   @Override
+   protected void saveAdditional(ValueOutput output) {
+      super.saveAdditional(output);
+      ValueOutput tanks = output.child("tank");
+      this.tank.inTank.serialize(tanks.child("in"));
+      this.tank.outTank.serialize(tanks.child("out"));
+      this.items.serialize(output.child("items"));
+      output.putInt("burnTime", this.fuelRemaining);
    }
 
-   public void load(CompoundTag tag) {
-      super.load(tag);
-      if (tag.contains("tank")) {
-         this.tank.readFromNBT(tag.getCompound("tank"));
-      }
-
-      if (tag.contains("items")) {
-         this.items.deserializeNBT(tag.getCompound("items"));
-      }
-
-      if (tag.contains("burnTime")) {
-         this.fuelRemaining = tag.getInt("burnTime");
-      }
+   @Override
+   protected void loadAdditional(ValueInput input) {
+      super.loadAdditional(input);
+      input.child("tank").ifPresent(tanks -> {
+         tanks.child("in").ifPresent(this.tank.inTank::deserialize);
+         tanks.child("out").ifPresent(this.tank.outTank::deserialize);
+      });
+      input.child("items").ifPresent(this.items::deserialize);
+      this.fuelRemaining = input.getIntOr("burnTime", 0);
    }
 
+   /** Pushes hot water out to the neighbours. */
    public void eject() {
-      for (Direction direction : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN}) {
-         if (this.tank.outTank.getFluidAmount() <= 0) {
-            return;
-         }
-
-         BlockEntity target = this.level.getBlockEntity(this.getBlockPos().relative(direction));
-         if (target != null) {
-            LazyOptional<IFluidHandler> fluidOptional = target.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite());
-            if (fluidOptional != null && fluidOptional.isPresent()) {
-               IFluidHandler storage = (IFluidHandler)fluidOptional.resolve().get();
-               int amount = storage.fill(this.tank.outTank.getFluid(), FluidAction.SIMULATE);
-               if (amount != 0) {
-                  amount = storage.fill(this.tank.outTank.getFluid(), FluidAction.EXECUTE);
-                  this.tank.drain(amount, FluidAction.EXECUTE);
-               }
-            }
-         }
-      }
+      TransferUtils.pushFluid(this.level, this.getBlockPos(), this.tank.outTank);
    }
 
-   public static class DoubleTank implements IFluidHandler {
-      private FluidTank inTank;
-      private FluidTank outTank;
+   /**
+    * The boiler's two tanks as one handler: water goes in to slot 0 ({@link #inTank}), hot water comes out of slot 1
+    * ({@link #outTank}), which holds twice as much.
+    */
+   public static class DoubleTank implements ResourceHandler<FluidResource> {
+      public final FluidTank inTank;
+      public final FluidTank outTank;
 
-      public DoubleTank(int capacity, Predicate<FluidStack> validatorInsert) {
-         this.inTank = new FluidTank(capacity, validatorInsert);
-         this.outTank = new FluidTank(capacity);
+      public DoubleTank(int capacity, Runnable onChanged) {
+         this.inTank = new FluidTank(capacity, fluid -> fluid.is(Fluids.WATER), onChanged);
+         this.outTank = new FluidTank(capacity, onChanged);
       }
 
-      public int getTanks() {
+      private FluidTank tank(int index) {
+         return index == 0 ? this.inTank : this.outTank;
+      }
+
+      @Override
+      public int size() {
          return 2;
       }
 
-      @NotNull
-      public FluidStack getFluidInTank(int tank) {
-         return tank == 0 ? this.inTank.getFluid() : this.outTank.getFluid();
+      @Override
+      public FluidResource getResource(int index) {
+         return tank(index).getResource(0);
       }
 
-      public int getTankCapacity(int tank) {
-         return this.inTank.getCapacity();
+      @Override
+      public long getAmountAsLong(int index) {
+         return tank(index).getAmountAsLong(0);
       }
 
-      public boolean isFluidValid(int tank, @NotNull FluidStack stack) {
-         return tank == 0 ? this.inTank.isFluidValid(stack) : this.outTank.isFluidValid(stack);
+      @Override
+      public long getCapacityAsLong(int index, FluidResource resource) {
+         return tank(index).getCapacity();
       }
 
-      public int fill(FluidStack resource, FluidAction action) {
-         this.onContentsChanged();
-         return this.inTank.fill(resource, action);
+      @Override
+      public boolean isValid(int index, FluidResource resource) {
+         return tank(index).isValid(0, resource);
       }
 
-      @NotNull
-      public FluidStack drain(FluidStack resource, FluidAction action) {
-         this.onContentsChanged();
-         return this.outTank.drain(resource, action);
+      @Override
+      public int insert(int index, FluidResource resource, int amount, TransactionContext transaction) {
+         return index == 0 ? this.inTank.insert(0, resource, amount, transaction) : 0;
       }
 
-      @NotNull
-      public FluidStack drain(int maxDrain, FluidAction action) {
-         this.onContentsChanged();
-         return this.outTank.drain(maxDrain, action);
-      }
-
-      public void drainIntake(int toDrain) {
-         this.onContentsChanged();
-         this.inTank.drain(toDrain, FluidAction.EXECUTE);
-      }
-
-      public void fillOutput(FluidStack resource) {
-         this.onContentsChanged();
-         this.outTank.fill(resource, FluidAction.EXECUTE);
+      @Override
+      public int extract(int index, FluidResource resource, int amount, TransactionContext transaction) {
+         return index == 1 ? this.outTank.extract(0, resource, amount, transaction) : 0;
       }
 
       public void setCapacity(int capacity, int outMult) {
          this.inTank.setCapacity(capacity);
          this.outTank.setCapacity(capacity * outMult);
       }
+   }
 
-      protected void onContentsChanged() {
-      }
-
-      public void readFromNBT(CompoundTag compound) {
-         if (compound.contains("in")) {
-            this.inTank.readFromNBT(compound.getCompound("in"));
+   /** Drops the machine's items when it is broken. */
+   @Override
+   public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+      super.preRemoveSideEffects(pos, state);
+      if (this.level != null) {
+         for (int i = 0; i < this.items.getSlots(); i++) {
+            if (!this.items.getStackInSlot(i).isEmpty()) {
+               Containers.dropItemStack(this.level, pos.getX(), pos.getY(), pos.getZ(), this.items.getStackInSlot(i));
+            }
          }
-
-         if (compound.contains("out")) {
-            this.outTank.readFromNBT(compound.getCompound("out"));
-         }
-      }
-
-      public Tag writeToNBT(CompoundTag tag) {
-         CompoundTag in = new CompoundTag();
-         this.inTank.writeToNBT(in);
-         tag.put("in", in);
-         CompoundTag out = new CompoundTag();
-         this.outTank.writeToNBT(out);
-         tag.put("out", out);
-         return tag;
       }
    }
 }

@@ -2,32 +2,32 @@ package co.uk.mommyheather.futuregenerators.ui;
 
 import co.uk.mommyheather.futuregenerators.config.FutureGeneratorsConfig;
 import co.uk.mommyheather.futuregenerators.render.RenderHelper;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.resources.language.I18n;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 public class FluidTankScreen extends AbstractContainerScreen<FluidTankMenu> {
    private static final int FLUID_LEFT = 26;
    private static final int FLUID_WIDTH = 124;
    private static final int FLUID_TOP = 24;
    private static final int FLUID_HEIGHT = 45;
-   private final ResourceLocation GUI = new ResourceLocation("futuregenerators", "textures/gui/tank.png");
+   private static final Identifier GUI = Identifier.fromNamespaceAndPath("futuregenerators", "textures/gui/tank.png");
 
    public FluidTankScreen(FluidTankMenu menu, Inventory inventory, Component title) {
-      super(menu, inventory, title);
-      this.imageWidth = 176;
+      super(menu, inventory, title, 176, 166);
       this.inventoryLabelY = this.imageHeight - 105;
    }
 
-   protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY) {
-      super.renderBackground(graphics);
+   @Override
+   public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+      super.extractBackground(graphics, mouseX, mouseY, partialTicks);
       int relX = (this.width - this.imageWidth) / 2;
       int relY = (this.height - this.imageHeight) / 2;
-      graphics.blit(this.GUI, relX, relY, 0, 0, this.imageWidth, this.imageHeight);
+      graphics.blit(RenderPipelines.GUI_TEXTURED, GUI, relX, relY, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
       if (!((FluidTankMenu)this.menu).tank.tank.isEmpty()) {
          float percent = (float)((FluidTankMenu)this.menu).tank.tank.getFluidAmount()
             / ((Integer)FutureGeneratorsConfig.SERVER.fluidTankCapacity.get()).intValue();
@@ -37,19 +37,19 @@ public class FluidTankScreen extends AbstractContainerScreen<FluidTankMenu> {
          );
       }
 
-      graphics.blit(this.GUI, this.leftPos + 26, this.topPos + 24, 176, 0, 66, 45);
+      graphics.blit(RenderPipelines.GUI_TEXTURED, GUI, this.leftPos + 26, this.topPos + 24, 176, 0, 66, 45, 256, 256);
    }
 
-   public void render(GuiGraphics graphics, int mousex, int mousey, float partialTick) {
-      super.render(graphics, mousex, mousey, partialTick);
+   @Override
+   protected void extractTooltip(GuiGraphicsExtractor graphics, int mousex, int mousey) {
       FluidStack fluid = ((FluidTankMenu)this.menu).tank.tank.getFluid();
       if (mousex >= this.leftPos + 26 && mousex < this.leftPos + 26 + 124 && mousey >= this.topPos + 24 && mousey < this.topPos + 24 + 45) {
          Component text;
          if (fluid.isEmpty()) {
-            text = Component.literal(I18n.get("futuregenerators.ui.empty", new Object[0]));
+            text = Component.literal(Component.translatable("futuregenerators.ui.empty").getString());
          } else {
             text = Component.literal(
-               I18n.get(fluid.getTranslationKey(), new Object[0])
+               fluid.getHoverName().getString()
                   + ": "
                   + fluid.getAmount() / 1000.0F
                   + " / "
@@ -58,13 +58,14 @@ public class FluidTankScreen extends AbstractContainerScreen<FluidTankMenu> {
             );
          }
 
-         graphics.renderTooltip(this.font, text, mousex, mousey);
+         graphics.setTooltipForNextFrame(this.font, text, mousex, mousey);
       } else {
-         this.renderTooltip(graphics, mousex, mousey);
+         super.extractTooltip(graphics, mousex, mousey);
       }
    }
 
-   protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
-      graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
+   @Override
+   protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
+      graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, 0xFF404040, false);
    }
 }

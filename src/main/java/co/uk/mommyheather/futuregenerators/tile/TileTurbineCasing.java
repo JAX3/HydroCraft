@@ -1,36 +1,28 @@
 package co.uk.mommyheather.futuregenerators.tile;
 
-import co.uk.mommyheather.futuregenerators.util.FutureGeneratorsEnergyStorage;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.energy.IEnergyStorage;
+import org.jspecify.annotations.Nullable;
 
+/** Part of the multiblock turbine. Once formed, it hands out its controller's tank and battery (see {@code Capabilities}). */
 public class TileTurbineCasing extends BlockEntity {
-   public TileTurbineController controller;
+   public @Nullable TileTurbineController controller;
    private boolean ticked = false;
 
-   public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-      return this.controller == null ? super.getCapability(cap, side) : this.controller.getCapability(cap, side);
+   public TileTurbineCasing(BlockPos pos, BlockState state) {
+      super(Tiles.turbineCasing.get(), pos, state);
    }
 
-   public void invalidateCaps() {
-      super.invalidateCaps();
-   }
-
-   public TileTurbineCasing(BlockPos p_155229_, BlockState p_155230_) {
-      super((BlockEntityType)Tiles.turbineCasing.get(), p_155229_, p_155230_);
+   /** The casing's capabilities change when it joins or leaves a turbine. */
+   public void setController(@Nullable TileTurbineController controller) {
+      this.controller = controller;
+      if (this.level != null) this.level.invalidateCapabilities(this.worldPosition);
    }
 
    public static void tick(Level level, BlockPos pos, BlockState state, BlockEntity be) {
-      if (!level.isClientSide) {
+      if (!level.isClientSide()) {
          TileTurbineCasing casing = (TileTurbineCasing)be;
          if (!casing.ticked) {
             casing.ticked = true;
@@ -43,8 +35,7 @@ public class TileTurbineCasing extends BlockEntity {
                      }
 
                      BlockPos pos2 = new BlockPos(x, pos.getY(), z);
-                     BlockEntity be2 = level.getBlockEntity(pos2);
-                     if (be2 != null && be2 instanceof TileTurbineController controller && !controller.valid) {
+                     if (level.getBlockEntity(pos2) instanceof TileTurbineController controller && !controller.valid) {
                         controller.validate();
                      }
                   }
@@ -54,33 +45,12 @@ public class TileTurbineCasing extends BlockEntity {
       }
    }
 
-   public void eject() {
-      for (Direction direction : new Direction[]{Direction.NORTH, Direction.EAST, Direction.SOUTH, Direction.WEST, Direction.UP, Direction.DOWN}) {
-         FutureGeneratorsEnergyStorage battery = this.controller.battery;
-         if (battery.getEnergyStored() <= 0) {
-            return;
-         }
-
-         BlockEntity target = this.level.getBlockEntity(this.getBlockPos().relative(direction));
-         if (target != null && !(target instanceof TileTurbineCasing) && !(target instanceof TileTurbineController)) {
-            LazyOptional<IEnergyStorage> energyOptional = target.getCapability(ForgeCapabilities.ENERGY, direction.getOpposite());
-            if (energyOptional != null && energyOptional.isPresent()) {
-               IEnergyStorage storage = (IEnergyStorage)energyOptional.resolve().get();
-               int energy = storage.receiveEnergy(battery.getEnergyStored(), true);
-               if (energy != 0) {
-                  storage.receiveEnergy(energy, false);
-                  battery.setEnergy(battery.getEnergyStored() - energy);
-               }
-            }
-         }
+   /** Breaking a casing un-forms its turbine. */
+   @Override
+   public void preRemoveSideEffects(BlockPos pos, BlockState state) {
+      super.preRemoveSideEffects(pos, state);
+      if (this.controller != null) {
+         this.controller.valid = false;
       }
-   }
-
-   protected void saveAdditional(CompoundTag tag) {
-      super.saveAdditional(tag);
-   }
-
-   public void load(CompoundTag tag) {
-      super.load(tag);
    }
 }

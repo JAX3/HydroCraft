@@ -8,7 +8,7 @@ import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class WasherMenu extends FutureGeneratorsMenu {
    public int water;
@@ -22,19 +22,19 @@ public class WasherMenu extends FutureGeneratorsMenu {
       this.SLOT_COUNT = 13;
       this.SLOT_INPUT = 3;
       if (be instanceof TileWasher washer) {
-         this.addSlot(new SlotItemHandler(washer.items, 0, 62, 15));
-         this.addSlot(new SlotItemHandler(washer.items, 1, 80, 15));
-         this.addSlot(new SlotItemHandler(washer.items, 2, 98, 15));
-         this.addSlot(new SlotItemHandler(washer.items, 3, 44, 44));
-         this.addSlot(new SlotItemHandler(washer.items, 4, 62, 44));
-         this.addSlot(new SlotItemHandler(washer.items, 5, 80, 44));
-         this.addSlot(new SlotItemHandler(washer.items, 6, 98, 44));
-         this.addSlot(new SlotItemHandler(washer.items, 7, 116, 44));
-         this.addSlot(new SlotItemHandler(washer.items, 8, 44, 62));
-         this.addSlot(new SlotItemHandler(washer.items, 9, 62, 62));
-         this.addSlot(new SlotItemHandler(washer.items, 10, 80, 62));
-         this.addSlot(new SlotItemHandler(washer.items, 11, 98, 62));
-         this.addSlot(new SlotItemHandler(washer.items, 12, 116, 62));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 0, 62, 15));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 1, 80, 15));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 2, 98, 15));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 3, 44, 44));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 4, 62, 44));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 5, 80, 44));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 6, 98, 44));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 7, 116, 44));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 8, 44, 62));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 9, 62, 62));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 10, 80, 62));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 11, 98, 62));
+         this.addSlot(new ResourceHandlerSlot(washer.items, washer.items::set, 12, 116, 62));
          this.layoutPlayerInventorySlots(player.getInventory(), 8, 84);
          this.addDataSlot(new DataSlot() {
             public int get() {

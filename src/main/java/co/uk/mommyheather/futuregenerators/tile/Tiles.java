@@ -1,43 +1,42 @@
 package co.uk.mommyheather.futuregenerators.tile;
 
+import co.uk.mommyheather.futuregenerators.FutureGenerators;
 import co.uk.mommyheather.futuregenerators.blocks.Blocks;
-import net.minecraft.world.level.block.Block;
+import java.util.function.Supplier;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.block.entity.BlockEntityType.Builder;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.RegistryObject;
+import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class Tiles {
-   public static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.BLOCK_ENTITY_TYPES, "futuregenerators");
-   public static final RegistryObject<BlockEntityType<TileTurbine>> turbine = TILES.register(
-      "turbine", () -> Builder.of(TileTurbine::new, new Block[]{(Block)Blocks.turbine.get()}).build(null)
+   public static final DeferredRegister<BlockEntityType<?>> TILES = DeferredRegister.create(Registries.BLOCK_ENTITY_TYPE, FutureGenerators.MODID);
+   public static final Supplier<BlockEntityType<TileTurbine>> turbine = TILES.register(
+      "turbine", () -> new BlockEntityType<>(TileTurbine::new, Blocks.turbine.get())
    );
-   public static final RegistryObject<BlockEntityType<TileTurbineCasing>> turbineCasing = TILES.register(
-      "turbine_casing", () -> Builder.of(TileTurbineCasing::new, new Block[]{(Block)Blocks.turbineCasing.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileTurbineCasing>> turbineCasing = TILES.register(
+      "turbine_casing", () -> new BlockEntityType<>(TileTurbineCasing::new, Blocks.turbineCasing.get())
    );
-   public static final RegistryObject<BlockEntityType<TileTurbineController>> turbineController = TILES.register(
-      "turbine_controller", () -> Builder.of(TileTurbineController::new, new Block[]{(Block)Blocks.turbineController.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileTurbineController>> turbineController = TILES.register(
+      "turbine_controller", () -> new BlockEntityType<>(TileTurbineController::new, Blocks.turbineController.get())
    );
-   public static final RegistryObject<BlockEntityType<TileLightningGenerator>> lightningGenerator = TILES.register(
-      "lightning_generator", () -> Builder.of(TileLightningGenerator::new, new Block[]{(Block)Blocks.lightningGenerator.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileLightningGenerator>> lightningGenerator = TILES.register(
+      "lightning_generator", () -> new BlockEntityType<>(TileLightningGenerator::new, Blocks.lightningGenerator.get())
    );
-   public static final RegistryObject<BlockEntityType<TileLightningDynamo>> lightningDynamo = TILES.register(
-      "lightning_dynamo", () -> Builder.of(TileLightningDynamo::new, new Block[]{(Block)Blocks.lightningDynamo.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileLightningDynamo>> lightningDynamo = TILES.register(
+      "lightning_dynamo", () -> new BlockEntityType<>(TileLightningDynamo::new, Blocks.lightningDynamo.get())
    );
-   public static final RegistryObject<BlockEntityType<TileWasher>> washer = TILES.register(
-      "washer", () -> Builder.of(TileWasher::new, new Block[]{(Block)Blocks.washer.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileWasher>> washer = TILES.register(
+      "washer", () -> new BlockEntityType<>(TileWasher::new, Blocks.washer.get())
    );
-   public static final RegistryObject<BlockEntityType<TileBoiler>> boiler = TILES.register(
-      "boiler", () -> Builder.of(TileBoiler::new, new Block[]{(Block)Blocks.boiler.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileBoiler>> boiler = TILES.register(
+      "boiler", () -> new BlockEntityType<>(TileBoiler::new, Blocks.boiler.get())
    );
-   public static final RegistryObject<BlockEntityType<TileFluidTank>> fluidTank = TILES.register(
-      "tank", () -> Builder.of(TileFluidTank::new, new Block[]{(Block)Blocks.fluidTank.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileFluidTank>> fluidTank = TILES.register(
+      "tank", () -> new BlockEntityType<>(TileFluidTank::new, Blocks.fluidTank.get())
    );
-   public static final RegistryObject<BlockEntityType<TilePump>> pump = TILES.register(
-      "pump", () -> Builder.of(TilePump::new, new Block[]{(Block)Blocks.pump.get()}).build(null)
+   public static final Supplier<BlockEntityType<TilePump>> pump = TILES.register(
+      "pump", () -> new BlockEntityType<>(TilePump::new, Blocks.pump.get())
    );
-   public static final RegistryObject<BlockEntityType<TileFluidPipe>> fluidPipe = TILES.register(
-      "fluid_pipe", () -> Builder.of(TileFluidPipe::new, new Block[]{(Block)Blocks.fluidPipe.get()}).build(null)
+   public static final Supplier<BlockEntityType<TileFluidPipe>> fluidPipe = TILES.register(
+      "fluid_pipe", () -> new BlockEntityType<>(TileFluidPipe::new, Blocks.fluidPipe.get())
    );
 }

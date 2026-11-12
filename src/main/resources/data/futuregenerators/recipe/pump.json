@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "A": "minecraft:amethyst_shard",
+    "F": "minecraft:furnace",
+    "I": "minecraft:iron_ingot",
+    "B": "minecraft:iron_bars",
+    "H": "minecraft:hopper"
+  },
+  "pattern": [
+    "AFA",
+    "IBI",
+    "IHI"
+  ],
+  "result": {
+    "id": "futuregenerators:pump"
+  }
+}

@@ -4,4 +4,5 @@ pluginManagement {
         maven { url = 'https://maven.neoforged.net/releases' }
     }
 }
+
 rootProject.name = 'hydrocraft'

@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "key": {
+    "I": "minecraft:iron_block",
+    "G": "minecraft:glass",
+    "R": "minecraft:redstone",
+    "D": "minecraft:diamond"
+  },
+  "pattern": [
+    "IGI",
+    "GRG",
+    "GDG"
+  ],
+  "result": {
+    "id": "futuregenerators:turbine_controller"
+  }
+}

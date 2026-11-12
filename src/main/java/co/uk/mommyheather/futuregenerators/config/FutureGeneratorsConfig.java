@@ -1,27 +1,22 @@
 package co.uk.mommyheather.futuregenerators.config;
 
-import com.electronwill.nightconfig.core.file.CommentedFileConfig;
-import com.electronwill.nightconfig.core.io.WritingMode;
-import java.io.File;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.Builder;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.Builder;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 import org.apache.commons.lang3.tuple.Pair;
 
+/**
+ * The mod's settings. Registered as a synced config (one per world, in {@code <world>/syncedconfig/}), so the server's
+ * values also reach the client, where the screens read them.
+ */
 public class FutureGeneratorsConfig {
    public static final FutureGeneratorsConfig.Server SERVER;
-   public static final ForgeConfigSpec SERVER_SPEC;
-
-   public static void loadConfig(ForgeConfigSpec config, String path) {
-      CommentedFileConfig file = (CommentedFileConfig)CommentedFileConfig.builder(new File(path)).sync().autosave().writingMode(WritingMode.REPLACE).build();
-      file.load();
-      config.setConfig(file);
-   }
+   public static final ModConfigSpec SERVER_SPEC;
 
    static {
-      Pair<FutureGeneratorsConfig.Server, ForgeConfigSpec> server = new Builder().configure(FutureGeneratorsConfig.Server::new);
-      SERVER = (FutureGeneratorsConfig.Server)server.getLeft();
-      SERVER_SPEC = (ForgeConfigSpec)server.getRight();
+      Pair<FutureGeneratorsConfig.Server, ModConfigSpec> server = new Builder().configure(FutureGeneratorsConfig.Server::new);
+      SERVER = server.getLeft();
+      SERVER_SPEC = server.getRight();
    }
 
    public static class Server {

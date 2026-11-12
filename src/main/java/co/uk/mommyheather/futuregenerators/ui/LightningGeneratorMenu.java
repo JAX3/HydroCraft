@@ -7,7 +7,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class LightningGeneratorMenu extends FutureGeneratorsMenu {
    public int power;
@@ -20,12 +20,12 @@ public class LightningGeneratorMenu extends FutureGeneratorsMenu {
       if (player.level().getBlockEntity(pos) instanceof TileLightningGenerator generator) {
          this.SLOT_COUNT = 6;
          this.SLOT_INPUT = 6;
-         this.addSlot(new SlotItemHandler(generator.items, 0, 97, 17));
-         this.addSlot(new SlotItemHandler(generator.items, 1, 115, 17));
-         this.addSlot(new SlotItemHandler(generator.items, 2, 97, 35));
-         this.addSlot(new SlotItemHandler(generator.items, 3, 115, 35));
-         this.addSlot(new SlotItemHandler(generator.items, 4, 97, 53));
-         this.addSlot(new SlotItemHandler(generator.items, 5, 115, 53));
+         this.addSlot(new ResourceHandlerSlot(generator.items, generator.items::set, 0, 97, 17));
+         this.addSlot(new ResourceHandlerSlot(generator.items, generator.items::set, 1, 115, 17));
+         this.addSlot(new ResourceHandlerSlot(generator.items, generator.items::set, 2, 97, 35));
+         this.addSlot(new ResourceHandlerSlot(generator.items, generator.items::set, 3, 115, 35));
+         this.addSlot(new ResourceHandlerSlot(generator.items, generator.items::set, 4, 97, 53));
+         this.addSlot(new ResourceHandlerSlot(generator.items, generator.items::set, 5, 115, 53));
          this.layoutPlayerInventorySlots(player.getInventory(), 8, 84);
          this.addDataSlot(new DataSlot() {
             public int get() {
