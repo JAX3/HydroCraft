@@ -1,0 +1,41 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev.legacyforge' version '2.0.148'
+}
+
+version = mod_version
+group = mod_group_id
+base.archivesName = 'HydroCraft'
+
+// Minecraft 1.20.1 runs on Java 17.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}
+
+legacyForge {
+    enable {
+        forgeVersion = "${minecraft_version}-${forge_version}"
+    }
+
+    runs {
+        client { client() }
+        server { server(); programArgument '--nogui' }
+    }
+    mods {
+        "${mod_id}" { sourceSet(sourceSets.main) }
+    }
+}
+
+tasks.named('jar') {
+    manifest {
+        attributes(
+            'Specification-Title': 'hydrocraft',
+            'Specification-Vendor': 'mommyheather',
+            'Specification-Version': '1',
+            'Implementation-Title': project.name,
+            'Implementation-Version': project.version,
+            'Implementation-Vendor': 'mommyheather'
+        )
+    }
+}

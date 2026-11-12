@@ -1,0 +1,46 @@
+{ 
+    "block.futuregenerators.turbine" : "Water Turbine",
+    "block.futuregenerators.turbine_controller" : "Turbine Controller",
+    "block.futuregenerators.turbine_casing" : "Turbine Casing",
+    "block.futuregenerators.lightning_generator" : "Lightning Generator",
+    "block.futuregenerators.lightning_dynamo" : "Lightning Dynamo",
+    "block.futuregenerators.washer" : "Washer",
+    "block.futuregenerators.boiler" : "Boiler",
+    "block.futuregenerators.tank" : "Fluid Tank",
+    "block.futuregenerators.pump" : "Fluid Pump",
+    "block.futuregenerators.fluid_pipe" : "Fluid Pipe",
+
+    "item.futuregenerators.lightning_charge" : "(Deprecated) Lightning Charge",
+    "item.futuregenerators.hot_water_bucket" : "Hot Water Bucket",
+
+    "fluid_type.futuregenerators.hot_water" : "Hot Water",
+
+    "futuregenerators.creativetab" : "HydroCraft",
+
+    "futuregenerators.ui.turbine" : "Water Turbine",
+    "futuregenerators.ui.lightning_generator" : "(Deprecated) Lightning Generator",
+    "futuregenerators.ui.lightning_dynamo" : "(Deprecated) Lightning Dynamo",
+    "futuregenerators.ui.washer" : "Washer",
+    "futuregenerators.ui.boiler" : "Boiler",
+    "futuregenerators.ui.tank" : "Fluid Tank",
+    "futuregenerators.ui.pump" : "Fluid Pump",
+
+    
+    "futuregenerators.ui.empty" : "Empty",
+
+    "futuregenerators.ui.speed" : "Speed: %1$s mb/t",
+    "futuregenerators.ui.production" : "Producing: %1$s FE/t",
+    "futuregenerators.ui.has_rod" : "Lightning Rod present.",
+    "futuregenerators.ui.no_rod" : "No Lightning Rod!",
+    "futuregenerators.ui.dynamos" : "Dynamos: %1$s",
+    "futuregenerators.ui.generators" : "Generators: %1$s",
+    "futuregenerators.ui.burn_time" : "Fuel Time Remaining: %1$s",
+    "futuregenerators.ui.pumping" : "Pumping: %1$s",
+    "futuregenerators.ui.pumping_nothing" : "Nothing to pump!",
+
+
+    "futuregenerators.interactions.priority" : "Priority set to %1$s",
+    "futuregenerators.interactions.pulling" : "Pull mode set to %1$s",
+
+    "futuregenerators.multiblock.turbine_not_enough_casings" : "Not enough casings for the turbine to form!"
+}
