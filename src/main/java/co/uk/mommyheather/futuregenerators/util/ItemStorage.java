@@ -3,13 +3,15 @@ package co.uk.mommyheather.futuregenerators.util;
 import java.util.function.BiPredicate;
 import java.util.function.IntPredicate;
 import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
- * A machine's item slots, standing in for Forge's old {@code ItemStackHandler}: NeoForge's transfer-API handler
- * (hoppers, pipes and GUI slots go through it) with the old direct slot helpers for the machines' own logic.
+ * A machine's item slots, standing in for Forge's old {@code ItemStackHandler}: NeoForge's transfer-API handler (GUI
+ * slots go through it) with the old direct slot helpers for the machines' own logic. Hoppers, pipes and other mods get
+ * {@link #automation()}, which can be stopped from taking items out of some slots (a machine's inputs).
  */
 public class ItemStorage extends ItemStacksResourceHandler {
     private final BiPredicate<Integer, ItemStack> validator;
@@ -32,10 +34,47 @@ public class ItemStorage extends ItemStacksResourceHandler {
         return !resource.isEmpty() && validator.test(index, resource.toStack());
     }
 
-    @Override
-    public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
-        return canExtract.test(index) ? super.extract(index, resource, amount, transaction) : 0;
+    /** What automation sees: the same slots, but items only come out of the slots {@code canExtract} allows. */
+    public ResourceHandler<ItemResource> automation() {
+        return automation;
     }
+
+    private final ResourceHandler<ItemResource> automation = new ResourceHandler<>() {
+        @Override
+        public int size() {
+            return ItemStorage.this.size();
+        }
+
+        @Override
+        public ItemResource getResource(int index) {
+            return ItemStorage.this.getResource(index);
+        }
+
+        @Override
+        public long getAmountAsLong(int index) {
+            return ItemStorage.this.getAmountAsLong(index);
+        }
+
+        @Override
+        public long getCapacityAsLong(int index, ItemResource resource) {
+            return ItemStorage.this.getCapacityAsLong(index, resource);
+        }
+
+        @Override
+        public boolean isValid(int index, ItemResource resource) {
+            return ItemStorage.this.isValid(index, resource);
+        }
+
+        @Override
+        public int insert(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            return ItemStorage.this.insert(index, resource, amount, transaction);
+        }
+
+        @Override
+        public int extract(int index, ItemResource resource, int amount, TransactionContext transaction) {
+            return canExtract.test(index) ? ItemStorage.this.extract(index, resource, amount, transaction) : 0;
+        }
+    };
 
     @Override
     protected void onContentsChanged(int index, ItemStack previousContents) {

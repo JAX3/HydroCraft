@@ -150,10 +150,17 @@ public class TileTurbineController extends BlockEntity {
       }
    }
 
-   /** Pushes power to the neighbours that aren't part of a turbine. */
+   /** Pushes power out of the controller and its casings into the neighbours that aren't part of a turbine. */
    public void eject() {
-      TransferUtils.pushEnergy(this.level, this.getBlockPos(), this.battery,
-         target -> this.level.getBlockEntity(target) instanceof TileTurbineController || this.level.getBlockEntity(target) instanceof TileTurbineCasing);
+      java.util.function.Predicate<BlockPos> turbinePart = target -> this.level.getBlockEntity(target) instanceof TileTurbineController
+         || this.level.getBlockEntity(target) instanceof TileTurbineCasing;
+      TransferUtils.pushEnergy(this.level, this.getBlockPos(), this.battery, turbinePart);
+      // Once formed, the casings push power out of their own sides as well.
+      if (this.valid) {
+         for (TileTurbineCasing casing : this.casings) {
+            TransferUtils.pushEnergy(this.level, casing.getBlockPos(), this.battery, turbinePart);
+         }
+      }
    }
 
    @Override

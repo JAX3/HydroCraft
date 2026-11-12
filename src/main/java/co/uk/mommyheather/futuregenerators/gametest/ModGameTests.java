@@ -56,6 +56,8 @@ public final class ModGameTests {
       TESTS.put("pump_drains_lava_sources", ModGameTests::pumpDrainsLava);
       TESTS.put("multiblock_turbine_forms_and_makes_power", ModGameTests::multiblockTurbine);
       TESTS.put("lightning_generator_runs_dynamo", ModGameTests::lightningDynamo);
+      TESTS.put("multiblock_turbine_casings_push_power", ModGameTests::casingsPushPower);
+      TESTS.put("washer_inputs_stay_put_for_hoppers_but_not_players", ModGameTests::washerInputs);
       TESTS.forEach((name, fn) -> FUNCTIONS.register(name, () -> fn));
    }
 
@@ -130,6 +132,22 @@ public final class ModGameTests {
       });
    }
 
+   /** A washer touching only a casing (not the controller) still gets power. */
+   private static void casingsPushPower(GameTestHelper h) {
+      BlockPos controllerPos = new BlockPos(2, 1, 3), washerPos = new BlockPos(4, 1, 2);
+      h.setBlock(new BlockPos(2, 1, 2), Blocks.turbineCasing.get());
+      h.setBlock(new BlockPos(3, 1, 3), Blocks.turbineCasing.get());
+      h.setBlock(new BlockPos(3, 1, 2), Blocks.turbineCasing.get());
+      h.setBlock(controllerPos, Blocks.turbineController.get());
+      h.setBlock(washerPos, Blocks.washer.get());
+      h.runAfterDelay(2, () -> {
+         h.assertTrue(h.getBlockEntity(controllerPos, TileTurbineController.class).valid, "the turbine forms");
+         pour(h, controllerPos, hotWater(), 20000);
+         h.succeedWhen(() -> h.assertTrue(h.getBlockEntity(washerPos, TileWasher.class).battery.getEnergyStored() > 0,
+            "the washer beside a casing is powered"));
+      });
+   }
+
    // ------------------------------------------------------------------ boiler
 
    private static void boilerHeatsWater(GameTestHelper h) {
@@ -181,6 +199,25 @@ public final class ModGameTests {
             h.assertTrue(washer.tank.getFluidAmount() < 10000, "hot water is used");
             h.assertTrue(washer.battery.getEnergyStored() < 10000, "power is used");
          });
+      });
+   }
+
+   private static void washerInputs(GameTestHelper h) {
+      BlockPos pos = new BlockPos(3, 1, 3);
+      h.setBlock(pos, Blocks.washer.get());
+      h.runAfterDelay(1, () -> {
+         TileWasher washer = h.getBlockEntity(pos, TileWasher.class);
+         var cobble = net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.COBBLESTONE);
+         var nugget = net.neoforged.neoforge.transfer.item.ItemResource.of(net.minecraft.world.item.Items.IRON_NUGGET);
+         washer.items.setStackInSlot(0, new ItemStack(net.minecraft.world.item.Items.COBBLESTONE, 10));
+         washer.items.setStackInSlot(3, new ItemStack(net.minecraft.world.item.Items.IRON_NUGGET, 5));
+         var automation = h.getLevel().getCapability(Capabilities.Item.BLOCK, h.absolutePos(pos), Direction.DOWN);
+         try (Transaction simulate = Transaction.openRoot()) {
+            h.assertTrue(automation.extract(0, cobble, 10, simulate) == 0, "hoppers can't take cobblestone out of the input");
+            h.assertTrue(automation.extract(3, nugget, 5, simulate) == 5, "hoppers can take the results");
+            h.assertTrue(washer.items.extract(0, cobble, 10, simulate) == 10, "players can take cobblestone back out in the GUI");
+         }
+         h.succeed();
       });
    }
 

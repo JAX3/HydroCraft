@@ -26,7 +26,8 @@ public final class Capabilities {
 
       event.registerBlockEntity(fluid, Tiles.washer.get(), (be, side) -> be.tank);
       event.registerBlockEntity(energy, Tiles.washer.get(), (be, side) -> be.battery);
-      event.registerBlockEntity(item, Tiles.washer.get(), (be, side) -> be.items);
+      // Hoppers and pipes can only take the washed results out, not the cobblestone waiting to be washed.
+      event.registerBlockEntity(item, Tiles.washer.get(), (be, side) -> be.items.automation());
 
       event.registerBlockEntity(energy, Tiles.lightningGenerator.get(), (be, side) -> be.battery);
       event.registerBlockEntity(item, Tiles.lightningGenerator.get(), (be, side) -> be.items);

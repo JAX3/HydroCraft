@@ -43,7 +43,7 @@ public class MultiblockTurbineScreen extends AbstractContainerScreen<MultiBlockT
       Component speed = Component.translatable("futuregenerators.ui.speed", new Object[]{((MultiBlockTurbineMenu)this.menu).speed});
       Component producing = Component.translatable(
          "futuregenerators.ui.production",
-         new Object[]{String.format("%,d", ((MultiBlockTurbineMenu)this.menu).speed * (Integer)FutureGeneratorsConfig.SERVER.turbineFeRatio.get())}
+         new Object[]{String.format("%,d", ((MultiBlockTurbineMenu)this.menu).speed * (Integer)FutureGeneratorsConfig.SERVER.multiblockTurbineFeRatio.get())}
       );
       graphics.centeredText(this.font, speed, this.width / 2, this.topPos + 24 + 37, 0xFFFFFFFF);
       graphics.centeredText(this.font, producing, this.width / 2, this.topPos + 24 + 37 + 9 + 1, 0xFFFFFFFF);

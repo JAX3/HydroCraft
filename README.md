@@ -18,8 +18,8 @@ The original Minecraft 1.20.1 / Forge 47 version is kept on the [`1.20.1`](../..
 |---|---|
 | **Boiler** | Burns furnace fuel to turn water into hot water (100 mB/t). Holds 8,000 mB of water and 16,000 mB of hot water. It pushes hot water into neighbouring blocks. |
 | **Water Turbine** | Runs on hot water. It spins up to 200 mB/t over 60 seconds and makes 4 FE per mB. It pushes power into neighbouring blocks. |
-| **Turbine Controller + Turbine Casing** | The multiblock turbine. Place a controller with three casings to make a 2x2 square. It reaches 1,000 mB/t over 100 seconds and makes 6 FE per mB. The casings accept hot water and give out power for the controller. |
-| **Washer** | Uses hot water (250 mB) and power (1,000 FE) to wash each cobblestone. Each wash has a chance of iron and gold nuggets and ores, quartz, lapis and redstone ore, ender pearls, diamond ore and netherite scrap. |
+| **Turbine Controller + Turbine Casing** | The multiblock turbine. Place a controller with three casings to make a 2x2 square. It reaches 1,000 mB/t over 100 seconds and makes 6 FE per mB. The casings accept hot water and push out power for the controller. |
+| **Washer** | Uses hot water (250 mB) and power (1,000 FE) to wash each cobblestone. Each wash has a chance of iron and gold nuggets and ores, quartz, lapis and redstone ore, ender pearls, diamond ore and netherite scrap. Hoppers and pipes only take the results out; players can take unwashed cobblestone back out in the GUI. |
 | **Fluid Pump** | Pumps fluid source blocks from below it, spreading out up to 32 blocks. It runs on burning fuel. By default it pumps water without draining it. |
 | **Fluid Pipe** | Moves fluid between anything that holds fluid. Right-click a connection with an empty hand to switch that side between pushing and pulling. Right-click the middle to raise the pipe's priority, or sneak-right-click to lower it. |
 | **Fluid Tank** | Holds 100,000 mB of any one fluid and shows it through its windows. Buckets fill and empty it. |
@@ -97,12 +97,12 @@ Comments could not be recovered. That version is on the `1.20.1` branch.
   - item drops on breaking now happen in `preRemoveSideEffects`;
   - menus open with `player.openMenu`;
   - the lightning generator accepts any copper lightning rod (oxidised or waxed).
-- **GameTests (new):** 10 tests covering every machine.
+- **GameTests (new):** 12 tests covering every machine.
 
-**Original behaviour kept as it was:**
-- The multiblock turbine's GUI shows "Producing" using the single turbine's FE ratio, so it shows less than the multiblock really makes.
-- Cobblestone can't be taken back out of the washer's input slots.
-- Turbine casings don't push power themselves; only the controller does.
+**Fixes to the original's behaviour:**
+- The multiblock turbine's GUI showed "Producing" using the single turbine's FE ratio (4), so it showed less than the multiblock really makes. It now uses the multiblock's ratio (6).
+- Cobblestone couldn't be taken back out of the washer's input slots. Players can now take it out in the GUI. Hoppers and pipes still only take the results, so automation never pulls out unwashed cobblestone.
+- Turbine casings didn't push power; only the controller did. Once the turbine has formed, each casing now pushes power into the blocks beside it too, so cables and machines can connect anywhere on the turbine.
 
 <p>
 <img src="docs/screenshots/02_tanks_pipes_pump.png" width="49%"> <img src="docs/screenshots/15_multiblock_turbine_gui.png" width="49%">
