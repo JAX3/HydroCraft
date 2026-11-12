@@ -25,7 +25,7 @@ The rebuilt jar contains exactly the same files as the original. On build it is 
 
 Local variable names did survive, because the jar kept its debug info.
 
-**Known issue carried over from the original:** `assets/futuregenerators/models/block/hot_water.json` uses the texture `futuregenerators:block/hot_water_still`, but the only texture is `hot_water.png`. The game logs a missing-texture warning for the hot water block.
+**Fixed since recovery:** the hot water block model pointed at a texture called `hot_water_still` that was never in the jar. It now uses `hot_water.png`, like the fluid itself.
 
 ## Building
 
